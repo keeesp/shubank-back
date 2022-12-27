@@ -1,0 +1,171 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  email      String @unique
+  password   String
+  name       String @unique
+  avatarPath String @default("/uploads/default-avatar.png") @map("avatar_path")
+
+  address String @default("")
+
+  contactId Int?
+  User      User?  @relation("Contacts", fields: [contactId], references: [id])
+  contacts  User[] @relation("Contacts")
+
+  bankAccounts BankAccount[]
+  savings      Saving[]
+
+  invoiceSender    Invoice[] @relation("Invoice sender")
+  invoiceRecipient Invoice[] @relation("Invoice recipient")
+
+  transactions Transaction[]
+}
+
+model BankAccount {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  number  String @unique
+  balance Int    @default(0)
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @map("user_id")
+
+  card   BankCard?
+  saving Saving?
+
+  @@map("Bank_account")
+}
+
+model BankCard {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  number        String            @unique @db.VarChar(16)
+  expireDate    String            @map("expire_date")
+  cvc           Int
+  paymentSystem EnumPaymentSystem @map("payment_system")
+  type          EnumCardType
+  bankName      String            @map("bank_name")
+
+  bankAccount   BankAccount @relation(fields: [bankAccountId], references: [id])
+  bankAccountId Int         @unique @map("bank_account_id")
+
+  @@map("Bank_card")
+}
+
+model Invoice {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  amount Int
+
+  sender      User  @relation("Invoice sender", fields: [senderId], references: [id])
+  senderId    Int   @map("sender_id")
+  recipient   User? @relation("Invoice recipient", fields: [recipientId], references: [id])
+  recipientId Int?  @map("recipient_id")
+
+  items        InvoiceItem[]
+  files        InvoiceFile[]
+  transactions Transaction[]
+}
+
+model InvoiceFile {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name String
+  size String
+  url  String
+
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  invoiceId Int?     @map("invoice_id")
+
+  @@map("Invoice_file")
+}
+
+model InvoiceItem {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name     String
+  duration Int
+  rate     Int
+  amount   Int
+
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  invoiceId Int?     @map("invoice_id")
+
+  @@map("Invoice_item")
+}
+
+model Saving {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  color String
+  name  String @unique
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @map("user_id")
+
+  bankAccount   BankAccount @relation(fields: [bankAccountId], references: [id])
+  bankAccountId Int         @unique @map("bank_account_id")
+}
+
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  status EnumTransactionStatus
+  amount Int                   @default(0)
+
+  type EnumTransactionType
+
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  invoiceId Int?     @map("invoice_id")
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @map("user_id")
+}
+
+enum EnumPaymentSystem {
+  VISA
+  MAESTRO
+  MASTERCARD
+  MIR
+}
+
+enum EnumCardType {
+  primary
+  secondary
+}
+
+enum EnumTransactionStatus {
+  Complete
+  Canceled
+  Pending
+}
+
+enum EnumTransactionType {
+  TOP_UP
+  WITHDRAWAL
+}
