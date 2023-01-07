@@ -124,8 +124,11 @@ export class BankAccountService {
 			}
 		})
 
-		return user.bankAccounts
-			.filter(account => account.card)
+		const is = user.bankAccounts.map((_, index) => index)
+
+		return is
+			.filter(index => user.bankAccounts[index].card)
+			.map(index => user.bankAccounts[index])
 			.map(account => ({
 				...account.card,
 				balance: account.balance,
@@ -133,8 +136,8 @@ export class BankAccountService {
 			}))
 	}
 
-	async delete(id: number) {
-		return this.prisma.bankAccount.delete({ where: { id } })
+	async delete(number: string) {
+		return this.prisma.bankAccount.delete({ where: { number } })
 	}
 
 	async topUpBalance(userId: number, { accountNumber, amount }: BalanceDto) {

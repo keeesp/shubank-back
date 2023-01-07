@@ -94,9 +94,9 @@ export class BankAccountController {
 	}
 
 	@HttpCode(200)
-	@Delete(':id')
+	@Delete(':number')
 	@Auth()
-	async deleteBankAccount(@Param('id') id: string) {
-		return this.bankAccountService.delete(+id)
+	async deleteBankAccount(@Param('number') number: string) {
+		return this.bankAccountService.delete(number)
 	}
 }

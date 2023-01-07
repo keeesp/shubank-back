@@ -18,7 +18,9 @@ export class UserService {
 				id
 			},
 			select: {
-				contacts: true,
+				contacts: {
+					select: userOutput
+				},
 				...userOutput
 			}
 		})

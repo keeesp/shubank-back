@@ -32,7 +32,7 @@ export class TransactionService {
 
 		const skip = (page - 1) * perPage
 
-		return this.prisma.transaction.findMany({
+		const transactions = await this.prisma.transaction.findMany({
 			where: { userId },
 			skip,
 			take: perPage,
@@ -43,9 +43,20 @@ export class TransactionService {
 				user: {
 					select: userOutput
 				},
-				invoice: true
+				invoice: {
+					include: {
+						recipient: true
+					}
+				}
 			}
 		})
+
+		return {
+			transactions,
+			length: await this.prisma.transaction.count({
+				where: { userId }
+			})
+		}
 	}
 
 	async create(userId: number, dto: TransactionDto, amount?: number) {

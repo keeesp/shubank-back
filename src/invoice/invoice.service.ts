@@ -36,7 +36,7 @@ export class InvoiceService {
 
 		const skip = (page - 1) * perPage
 
-		return this.prisma.invoice.findMany({
+		const invoices = await this.prisma.invoice.findMany({
 			where: { OR: [{ senderId: userId }, { recipientId: userId }] },
 			skip,
 			take: perPage,
@@ -44,8 +44,16 @@ export class InvoiceService {
 				createdAt: 'desc'
 			},
 			include: {
-				items: true,
-				files: true,
+				items: {
+					include: {
+						invoice: true
+					}
+				},
+				files: {
+					include: {
+						invoice: true
+					}
+				},
 				recipient: {
 					select: userOutput
 				},
@@ -55,6 +63,13 @@ export class InvoiceService {
 				transactions: true
 			}
 		})
+
+		return {
+			invoices,
+			length: await this.prisma.invoice.count({
+				where: { OR: [{ senderId: userId }, { recipientId: userId }] }
+			})
+		}
 	}
 
 	async getByRecipient(recipientId: number) {

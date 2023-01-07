@@ -33,7 +33,7 @@ export class SavingService {
 
 		const skip = (page - 1) * perPage
 
-		return this.prisma.saving.findMany({
+		const savings = await this.prisma.saving.findMany({
 			where: { userId },
 			skip,
 			take: perPage,
@@ -55,6 +55,13 @@ export class SavingService {
 				}
 			}
 		})
+
+		return {
+			savings,
+			length: await this.prisma.saving.count({
+				where: { userId }
+			})
+		}
 	}
 
 	async create(userId: number) {

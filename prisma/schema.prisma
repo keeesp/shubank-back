@@ -61,7 +61,7 @@ model BankCard {
   type          EnumCardType
   bankName      String            @map("bank_name")
 
-  bankAccount   BankAccount @relation(fields: [bankAccountId], references: [id])
+  bankAccount   BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
   bankAccountId Int         @unique @map("bank_account_id")
 
   @@map("Bank_card")
@@ -121,7 +121,7 @@ model Saving {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   color String
-  name  String @unique
+  name  String
 
   user   User @relation(fields: [userId], references: [id])
   userId Int  @map("user_id")
