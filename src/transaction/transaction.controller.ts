@@ -13,12 +13,10 @@ import {
 import { Auth } from '../auth/decorators/auth.decorator'
 import { CurrentUser } from '../user/user.decorator'
 
-import { ApiTags } from '@nestjs/swagger'
 import { OrderByWithPagination } from '../dto/pagination.dto'
 import { TransactionDto } from './transaction.dto'
 import { TransactionService } from './transaction.service'
 
-@ApiTags('Transactions')
 @Controller('transactions')
 export class TransactionController {
 	constructor(private readonly transactionService: TransactionService) {}
